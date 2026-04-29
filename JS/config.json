@@ -1,0 +1,16 @@
+{
+  "host": "localhost",
+  "port": 25565,
+  "username": "24ATERNOSBOT",
+  "version": false,
+  "auth": "offline",
+  "register": "/register 123123123 123123123",
+  "login": "/login 123123123 123123123",
+  "antiAfk": {
+    "forward": true,
+    "jump": true,
+    "sprint": true
+  },
+  "autoReconnect": true,
+  "reconnectDelayMs": 5000
+}

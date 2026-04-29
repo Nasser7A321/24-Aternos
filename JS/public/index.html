@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>24 Aternos — Control Panel</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">24</span>
+      <div>
+        <h1>24 Aternos</h1>
+        <p class="subtitle">لوحة تحكم بوت Minecraft</p>
+      </div>
+    </div>
+    <div class="status-pill" id="statusPill">
+      <span class="dot" id="statusDot"></span>
+      <span id="statusText">offline</span>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="card">
+      <h2>إعدادات السيرفر</h2>
+      <form id="configForm" class="form">
+        <label>
+          <span>Host (عنوان السيرفر)</span>
+          <input type="text" name="host" placeholder="your-server.aternos.me" required />
+        </label>
+        <div class="row">
+          <label>
+            <span>Port</span>
+            <input type="number" name="port" min="1" max="65535" required />
+          </label>
+          <label>
+            <span>Username</span>
+            <input type="text" name="username" required />
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            <span>Auth</span>
+            <select name="auth">
+              <option value="offline">offline (Cracked)</option>
+              <option value="microsoft">microsoft (Premium)</option>
+            </select>
+          </label>
+          <label>
+            <span>Version</span>
+            <input type="text" name="version" placeholder="auto أو 1.20.4" />
+          </label>
+        </div>
+        <label>
+          <span>أمر التسجيل (اختياري)</span>
+          <input type="text" name="register" placeholder="/register password password" />
+        </label>
+        <label>
+          <span>أمر الدخول (اختياري)</span>
+          <input type="text" name="login" placeholder="/login password" />
+        </label>
+
+        <fieldset class="afk">
+          <legend>Anti-AFK</legend>
+          <label class="check"><input type="checkbox" name="afkForward" /> Forward</label>
+          <label class="check"><input type="checkbox" name="afkJump" /> Jump</label>
+          <label class="check"><input type="checkbox" name="afkSprint" /> Sprint</label>
+        </fieldset>
+
+        <div class="row">
+          <label class="check">
+            <input type="checkbox" name="autoReconnect" /> إعادة الاتصال التلقائي
+          </label>
+          <label>
+            <span>Reconnect delay (ms)</span>
+            <input type="number" name="reconnectDelayMs" min="500" step="500" />
+          </label>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn">حفظ الإعدادات</button>
+          <span id="saveHint" class="hint"></span>
+        </div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>التحكم</h2>
+      <div class="controls">
+        <button id="btnStart" class="btn primary">تشغيل</button>
+        <button id="btnStop" class="btn danger">إيقاف</button>
+        <button id="btnAfkOn" class="btn">AntiAFK ON</button>
+        <button id="btnAfkOff" class="btn">AntiAFK OFF</button>
+      </div>
+
+      <div class="stats" id="stats">
+        <div><span class="k">Health</span><span class="v" id="statHealth">—</span></div>
+        <div><span class="k">Food</span><span class="v" id="statFood">—</span></div>
+        <div><span class="k">Position</span><span class="v" id="statPos">—</span></div>
+        <div><span class="k">Players</span><span class="v" id="statPlayers">—</span></div>
+      </div>
+
+      <h3>إرسال رسالة في الشات</h3>
+      <form id="chatForm" class="chat-form">
+        <input type="text" id="chatInput" placeholder="اكتب رسالة أو أمر مثل /home" autocomplete="off" />
+        <button type="submit" class="btn">إرسال</button>
+      </form>
+    </section>
+
+    <section class="card wide">
+      <div class="logs-header">
+        <h2>السجل المباشر</h2>
+        <div>
+          <label class="check"><input type="checkbox" id="autoscroll" checked /> تمرير تلقائي</label>
+          <button id="btnClear" class="btn small">مسح</button>
+        </div>
+      </div>
+      <div class="logs" id="logs"></div>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
