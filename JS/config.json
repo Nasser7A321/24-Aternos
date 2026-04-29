@@ -1,11 +1,11 @@
 {
-  "host": "localhost",
-  "port": 25565,
+  "host": "HNasser7A321.aternos.me",
+  "port": 62194,
   "username": "24ATERNOSBOT",
-  "version": false,
+  "version": "1.21.11",
   "auth": "offline",
-  "register": "/register 123123123 123123123",
-  "login": "/login 123123123 123123123",
+  "register": "",
+  "login": "",
   "antiAfk": {
     "forward": true,
     "jump": true,

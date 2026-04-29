@@ -7,6 +7,8 @@ const els = {
   statusText: $('#statusText'),
   btnStart: $('#btnStart'),
   btnStop: $('#btnStop'),
+  btnPing: $('#btnPing'),
+  pingResult: $('#pingResult'),
   btnAfkOn: $('#btnAfkOn'),
   btnAfkOff: $('#btnAfkOff'),
   chatForm: $('#chatForm'),
@@ -154,9 +156,44 @@ function connectStream() {
   es.onerror = () => { /* browser will auto-retry */ };
 }
 
+async function runPing() {
+  const cfg = readConfigFromForm();
+  els.pingResult.hidden = false;
+  els.pingResult.className = 'ping-result';
+  els.pingResult.textContent = 'جاري فحص ' + cfg.host + ':' + cfg.port + '...';
+  try {
+    const res = await fetch('/api/ping', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ host: cfg.host, port: cfg.port }),
+    });
+    const data = await res.json();
+    if (!data.reachable) {
+      els.pingResult.className = 'ping-result fail';
+      els.pingResult.innerHTML =
+        '<strong>السيرفر غير قابل للوصول</strong><br>' +
+        '<span class="k">السبب:</span>' + (data.error || 'unknown') + '<br>' +
+        '<span class="k">تلميح:</span>' + (data.hint || '');
+    } else {
+      els.pingResult.className = 'ping-result ok';
+      let html = '<strong>السيرفر متصل ✓</strong>';
+      if (data.motd) html += '<br><span class="k">MOTD:</span>' + data.motd;
+      if (data.version) html += '<br><span class="k">Version:</span>' + data.version;
+      if (data.players) html += '<br><span class="k">Players:</span>' + (data.players.online || 0) + ' / ' + (data.players.max || 0);
+      if (data.latency != null) html += '<br><span class="k">Latency:</span>' + data.latency + ' ms';
+      if (data.warning) html += '<br><span class="k">⚠</span>' + data.warning;
+      els.pingResult.innerHTML = html;
+    }
+  } catch (e) {
+    els.pingResult.className = 'ping-result fail';
+    els.pingResult.textContent = 'فشل الفحص: ' + e.message;
+  }
+}
+
 els.form.addEventListener('submit', saveConfig);
 els.btnStart.addEventListener('click', () => api('/api/start'));
 els.btnStop.addEventListener('click', () => api('/api/stop'));
+els.btnPing.addEventListener('click', runPing);
 els.btnAfkOn.addEventListener('click', () => api('/api/anti-afk', { enabled: true }));
 els.btnAfkOff.addEventListener('click', () => api('/api/anti-afk', { enabled: false }));
 els.btnClear.addEventListener('click', () => (els.logs.innerHTML = ''));

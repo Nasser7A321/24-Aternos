@@ -113,7 +113,21 @@ class BotManager extends EventEmitter {
     });
 
     bot.on('error', (err) => {
-      this.log('error', err.message || String(err));
+      const msg = err.message || String(err);
+      this.log('error', msg);
+      if (err.code === 'ECONNRESET') {
+        this.log('warn', 'Hint: ECONNRESET = the server closed the connection. Common causes:');
+        this.log('warn', '  • Aternos server is offline/sleeping — start it from aternos.org first.');
+        this.log('warn', '  • Wrong Minecraft version — try setting Version explicitly (e.g. 1.20.4).');
+        this.log('warn', '  • Premium server but Auth is set to offline (or vice versa).');
+        this.log('warn', '  • Aternos may be blocking mineflayer-style bots.');
+      } else if (err.code === 'ECONNREFUSED') {
+        this.log('warn', 'Hint: ECONNREFUSED = nothing is listening at that host:port. Check host/port.');
+      } else if (err.code === 'ENOTFOUND') {
+        this.log('warn', 'Hint: ENOTFOUND = host name cannot be resolved. Check the spelling of host.');
+      } else if (err.code === 'ETIMEDOUT') {
+        this.log('warn', 'Hint: ETIMEDOUT = server did not respond. It may be sleeping or blocked.');
+      }
     });
 
     bot.on('end', (reason) => {
