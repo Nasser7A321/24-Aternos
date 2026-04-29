@@ -11,5 +11,8 @@
   "directories": {
     "test": "test"
   },
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "mineflayer": "^4.25.0"
+  }
 }
