@@ -157,12 +157,39 @@ class BotManager extends EventEmitter {
     bot.on('end', (reason) => {
       this.log('warn', `Disconnected (${reason || 'unknown'}).`);
       this._stopViewer();
+      this._flying = false;
       this.bot = null;
       this.setStatus('offline');
       if (this.shouldRun && cfg.autoReconnect !== false) {
         this._scheduleReconnect();
       }
     });
+  }
+
+  toggleFly() {
+    if (!this.bot || this.status !== 'online') {
+      this.log('warn', 'Cannot fly: bot is not online.');
+      return false;
+    }
+    if (!this.bot.creative) {
+      this.log('warn', 'Creative API not available on this version.');
+      return false;
+    }
+    try {
+      if (this._flying) {
+        this.bot.creative.stopFlying();
+        this._flying = false;
+        this.log('info', 'Stopped flying.');
+      } else {
+        this.bot.creative.startFlying();
+        this._flying = true;
+        this.log('info', 'Started flying (requires creative/permission).');
+      }
+      return true;
+    } catch (e) {
+      this.log('error', `Fly toggle failed: ${e.message}`);
+      return false;
+    }
   }
 
   _startViewer() {
@@ -437,6 +464,7 @@ class BotManager extends EventEmitter {
       gameMode: this.bot ? this.bot.game && this.bot.game.gameMode : null,
       inventory: this.getInventory(),
       viewerReady: !!this._viewerStarted,
+      flying: !!this._flying,
     };
   }
 }

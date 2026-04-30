@@ -107,42 +107,6 @@
         <div><span class="k">Players</span><span class="v" id="statPlayers">—</span></div>
       </div>
 
-      <h3>التحكم بالحركة</h3>
-      <div class="movement-controls">
-        <div class="duration-row">
-          <label>المدة (ثانية):
-            <input type="number" id="moveDuration" value="2" min="0.1" step="0.1" max="60" />
-          </label>
-        </div>
-        <div class="dpad">
-          <div></div>
-          <button class="btn move" data-action="forward" title="تقدّم">▲</button>
-          <div></div>
-          <button class="btn move" data-action="left" title="يسار">◀</button>
-          <button class="btn move" data-action="jump" title="قفز">⤒</button>
-          <button class="btn move" data-action="right" title="يمين">▶</button>
-          <div></div>
-          <button class="btn move" data-action="back" title="تراجع">▼</button>
-          <div></div>
-        </div>
-        <div class="extra-actions">
-          <button class="btn move" data-action="sneak" title="تخفّي">🦆 تخفّي</button>
-          <button class="btn move" data-action="sprint" title="ركض">⚡ ركض</button>
-          <button id="btnAttack" class="btn">⚔️ ضرب</button>
-          <button id="btnDrop" class="btn">🎒 إسقاط</button>
-          <button id="btnMoveStop" class="btn danger">⏹ إيقاف</button>
-        </div>
-
-        <h3>التحكم بالنظر</h3>
-        <div class="look-controls">
-          <button class="btn look" data-direction="up" data-deg="30">⬆ أعلى</button>
-          <button class="btn look" data-direction="left" data-deg="45">↺ يسار 45°</button>
-          <button class="btn look" data-direction="reset">🎯 وسط</button>
-          <button class="btn look" data-direction="right" data-deg="45">↻ يمين 45°</button>
-          <button class="btn look" data-direction="down" data-deg="30">⬇ أسفل</button>
-        </div>
-      </div>
-
       <h3>الذهاب إلى إحداثيات</h3>
       <div class="goto-row">
         <input type="number" id="gotoX" placeholder="X" step="1" />
@@ -172,6 +136,55 @@
         <iframe id="viewerFrame" src="about:blank" title="Bot 3D View"></iframe>
         <div id="viewerOverlay" class="viewer-overlay">
           شغّل البوت لرؤية ما يراه داخل اللعبة بصيغة 3D.
+        </div>
+      </div>
+
+      <div class="viewer-controls">
+        <div class="vc-section vc-move">
+          <div class="vc-label">الحركة</div>
+          <div class="dpad">
+            <div></div>
+            <button class="btn move dpad-btn" data-action="forward" title="تقدّم">▲</button>
+            <div></div>
+            <button class="btn move dpad-btn" data-action="left" title="يسار">◀</button>
+            <button class="btn move dpad-btn jump-btn" data-action="jump" title="قفز">⤒</button>
+            <button class="btn move dpad-btn" data-action="right" title="يمين">▶</button>
+            <div></div>
+            <button class="btn move dpad-btn" data-action="back" title="تراجع">▼</button>
+            <div></div>
+          </div>
+          <div class="duration-mini">
+            <label>المدة (ث):
+              <input type="number" id="moveDuration" value="2" min="0.1" step="0.1" max="60" />
+            </label>
+          </div>
+        </div>
+
+        <div class="vc-section vc-look">
+          <div class="vc-label">النظر</div>
+          <div class="look-pad">
+            <div></div>
+            <button class="btn look look-btn" data-direction="up" data-deg="30" title="أعلى">⬆</button>
+            <div></div>
+            <button class="btn look look-btn" data-direction="left" data-deg="45" title="يسار 45°">⟲</button>
+            <button class="btn look look-btn" data-direction="reset" title="وسط">⊙</button>
+            <button class="btn look look-btn" data-direction="right" data-deg="45" title="يمين 45°">⟳</button>
+            <div></div>
+            <button class="btn look look-btn" data-direction="down" data-deg="30" title="أسفل">⬇</button>
+            <div></div>
+          </div>
+        </div>
+
+        <div class="vc-section vc-actions">
+          <div class="vc-label">الإجراءات</div>
+          <div class="action-grid">
+            <button class="btn move action-btn" data-action="sprint" title="ركض">⚡<br><span>ركض</span></button>
+            <button class="btn move action-btn" data-action="sneak" title="تخفّي">🦆<br><span>تخفّي</span></button>
+            <button id="btnFly" class="btn action-btn" title="طيران">🪽<br><span>طيران</span></button>
+            <button id="btnAttack" class="btn action-btn" title="ضرب">⚔️<br><span>ضرب</span></button>
+            <button id="btnDrop" class="btn action-btn" title="إسقاط">🎒<br><span>إسقاط</span></button>
+            <button id="btnMoveStop" class="btn danger action-btn" title="إيقاف الحركة">⏹<br><span>إيقاف</span></button>
+          </div>
         </div>
       </div>
     </section>

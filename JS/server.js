@@ -144,6 +144,11 @@ app.post('/api/eat', (req, res) => {
   res.json({ ok });
 });
 
+app.post('/api/fly', (req, res) => {
+  const ok = manager.toggleFly();
+  res.json({ ok });
+});
+
 app.post('/api/ping', (req, res) => {
   const cfg = loadConfig();
   const host = (req.body && req.body.host) || cfg.host;

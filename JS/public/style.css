@@ -356,3 +356,132 @@ fieldset.afk legend { color: var(--muted); padding: 0 6px; font-size: 12px; }
   color: var(--text);
   font-size: 13px;
 }
+
+.viewer-controls {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 12px;
+  align-items: stretch;
+}
+.vc-section {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.vc-label {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+  text-align: center;
+}
+.viewer-controls .dpad,
+.viewer-controls .look-pad {
+  direction: ltr;
+  display: grid;
+  grid-template-columns: repeat(3, 44px);
+  grid-template-rows: repeat(3, 44px);
+  gap: 4px;
+}
+.viewer-controls .dpad-btn,
+.viewer-controls .look-btn {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  font-size: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.12s, transform 0.08s;
+}
+.viewer-controls .dpad-btn:hover,
+.viewer-controls .look-btn:hover {
+  background: var(--panel);
+  border-color: var(--accent);
+}
+.viewer-controls .dpad-btn:active,
+.viewer-controls .look-btn:active {
+  transform: scale(0.92);
+  background: var(--accent);
+  color: #052e13;
+}
+.viewer-controls .jump-btn {
+  background: linear-gradient(135deg, #2d3344 0%, #1f232c 100%);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.duration-mini {
+  font-size: 11px;
+  color: var(--muted);
+}
+.duration-mini input {
+  width: 56px;
+  padding: 4px 6px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 12px;
+  margin-right: 4px;
+}
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  width: 100%;
+}
+.action-btn {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 4px !important;
+  font-size: 18px;
+  line-height: 1.1;
+  min-height: 56px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.12s, transform 0.08s;
+}
+.action-btn span {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+  display: block;
+}
+.action-btn:hover {
+  border-color: var(--accent);
+}
+.action-btn:active {
+  transform: scale(0.96);
+}
+.action-btn.active {
+  background: var(--accent);
+  color: #052e13;
+  border-color: var(--accent);
+}
+.action-btn.active span {
+  color: #052e13;
+}
+.action-btn.danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+@media (max-width: 800px) {
+  .viewer-controls {
+    grid-template-columns: 1fr;
+  }
+}

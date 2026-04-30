@@ -156,6 +156,8 @@ function applySnapshot(snap) {
   renderInventory(snap.inventory);
   renderPlayers(snap.players);
   updateViewerVisibility(snap.status);
+  const flyBtn = document.getElementById('btnFly');
+  if (flyBtn) flyBtn.classList.toggle('active', !!snap.flying);
   if (Array.isArray(snap.logs)) {
     els.logs.innerHTML = '';
     snap.logs.forEach(appendLog);
@@ -308,6 +310,9 @@ if (btnGoto) btnGoto.addEventListener('click', () => {
 });
 if (btnGotoStop) btnGotoStop.addEventListener('click', () => api('/api/goto-stop'));
 if (btnEat) btnEat.addEventListener('click', () => api('/api/eat'));
+
+const btnFly = document.getElementById('btnFly');
+if (btnFly) btnFly.addEventListener('click', () => api('/api/fly'));
 
 if (els.btnViewerReload) {
   els.btnViewerReload.addEventListener('click', () => {
