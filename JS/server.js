@@ -2,7 +2,10 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const net = require('net');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 const BotManager = require('./botManager');
+
+const VIEWER_INTERNAL_PORT = 3007;
 
 let mcProtocol = null;
 try { mcProtocol = require('minecraft-protocol'); } catch (e) { /* optional */ }
@@ -39,6 +42,21 @@ const app = express();
 const manager = new BotManager();
 
 app.use(express.json());
+
+const viewerProxy = createProxyMiddleware({
+  target: `http://127.0.0.1:${VIEWER_INTERNAL_PORT}`,
+  changeOrigin: true,
+  ws: true,
+  pathRewrite: { '^/viewer': '' },
+  onError: (err, req, res) => {
+    if (res && res.writeHead && !res.headersSent) {
+      res.writeHead(503, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end('<html><body style="background:#0a0c10;color:#9aa3b2;font-family:sans-serif;padding:24px;text-align:center"><h2>3D Viewer غير جاهز</h2><p>شغّل البوت أولاً وانتظر دخوله السيرفر.</p></body></html>');
+    }
+  },
+});
+app.use('/viewer', viewerProxy);
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/api/config', (req, res) => {
@@ -107,6 +125,22 @@ app.post('/api/attack', (req, res) => {
 
 app.post('/api/drop', (req, res) => {
   const ok = manager.dropItem();
+  res.json({ ok });
+});
+
+app.post('/api/goto', (req, res) => {
+  const { x, y, z } = req.body || {};
+  const ok = manager.goto(x, y, z);
+  res.json({ ok });
+});
+
+app.post('/api/goto-stop', (req, res) => {
+  const ok = manager.stopGoto();
+  res.json({ ok });
+});
+
+app.post('/api/eat', (req, res) => {
+  const ok = manager.eat();
   res.json({ ok });
 });
 
@@ -189,6 +223,12 @@ app.get('/api/events', (req, res) => {
   });
 });
 
-app.listen(PORT, HOST, () => {
+const server = app.listen(PORT, HOST, () => {
   console.log(`24-Aternos web UI running at http://${HOST}:${PORT}`);
+});
+
+server.on('upgrade', (req, socket, head) => {
+  if (req.url && req.url.startsWith('/viewer')) {
+    viewerProxy.upgrade(req, socket, head);
+  }
 });

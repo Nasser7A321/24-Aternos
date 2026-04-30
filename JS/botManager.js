@@ -1,5 +1,15 @@
 const mineflayer = require('mineflayer');
 const EventEmitter = require('events');
+const { pathfinder, Movements, goals } = require('mineflayer-pathfinder');
+const { loader: autoEatLoader } = require('mineflayer-auto-eat');
+let mineflayerViewer = null;
+try {
+  mineflayerViewer = require('prismarine-viewer').mineflayer;
+} catch (e) {
+  console.warn('[viewer] prismarine-viewer not available:', e.message);
+}
+
+const VIEWER_PORT = 3007;
 
 class BotManager extends EventEmitter {
   constructor() {
@@ -71,6 +81,13 @@ class BotManager extends EventEmitter {
 
     this.bot = bot;
 
+    try {
+      bot.loadPlugin(pathfinder);
+      bot.loadPlugin(autoEatLoader);
+    } catch (e) {
+      this.log('warn', `Plugin load issue: ${e.message}`);
+    }
+
     bot.on('login', () => {
       this.log('info', 'Logged in successfully.');
       this.setStatus('online');
@@ -80,6 +97,8 @@ class BotManager extends EventEmitter {
 
     bot.on('spawn', () => {
       this.log('info', 'Bot spawned in world.');
+      this._startViewer();
+      this._configureAutoEat();
       if (cfg.autoStartAntiAfk) {
         const a = cfg.antiAfk || {};
         if (a.forward) bot.setControlState('forward', true);
@@ -137,12 +156,53 @@ class BotManager extends EventEmitter {
 
     bot.on('end', (reason) => {
       this.log('warn', `Disconnected (${reason || 'unknown'}).`);
+      this._stopViewer();
       this.bot = null;
       this.setStatus('offline');
       if (this.shouldRun && cfg.autoReconnect !== false) {
         this._scheduleReconnect();
       }
     });
+  }
+
+  _startViewer() {
+    if (!this.bot) return;
+    if (this._viewerStarted) return;
+    if (!mineflayerViewer) {
+      this.log('warn', '3D viewer is not installed (canvas dependency missing).');
+      return;
+    }
+    try {
+      mineflayerViewer(this.bot, {
+        port: VIEWER_PORT,
+        firstPerson: true,
+      });
+      this._viewerStarted = true;
+      this.log('info', `3D viewer started on internal port ${VIEWER_PORT}.`);
+    } catch (e) {
+      this.log('warn', `Could not start viewer: ${e.message}`);
+    }
+  }
+
+  _stopViewer() {
+    this._viewerStarted = false;
+  }
+
+  _configureAutoEat() {
+    if (!this.bot || !this.bot.autoEat) return;
+    try {
+      this.bot.autoEat.setOpts({
+        priority: 'foodPoints',
+        startAt: 14,
+        bannedFood: ['rotten_flesh', 'pufferfish', 'chorus_fruit', 'poisonous_potato', 'spider_eye'],
+      });
+      const enabled = (this.config && this.config.autoEat) !== false;
+      if (this.bot.autoEat.enable && enabled) this.bot.autoEat.enable();
+      this.bot.on('autoeat_started', (item) => this.log('info', `Eating ${item ? item.name : 'food'}...`));
+      this.bot.on('autoeat_finished', () => this.log('info', 'Done eating.'));
+    } catch (e) {
+      this.log('warn', `Auto-eat setup issue: ${e.message}`);
+    }
   }
 
   _scheduleReconnect() {
@@ -284,6 +344,80 @@ class BotManager extends EventEmitter {
     return true;
   }
 
+  goto(x, y, z) {
+    if (!this.bot || this.status !== 'online') {
+      this.log('warn', 'Cannot go to: bot is not online.');
+      return false;
+    }
+    if (!this.bot.pathfinder) {
+      this.log('warn', 'Pathfinder not loaded.');
+      return false;
+    }
+    const fx = parseFloat(x), fy = parseFloat(y), fz = parseFloat(z);
+    if (isNaN(fx) || isNaN(fy) || isNaN(fz)) {
+      this.log('warn', 'Invalid coordinates.');
+      return false;
+    }
+    try {
+      const mcData = require('minecraft-data')(this.bot.version);
+      const movements = new Movements(this.bot, mcData);
+      this.bot.pathfinder.setMovements(movements);
+      this.bot.pathfinder.setGoal(new goals.GoalNear(fx, fy, fz, 1));
+      this.log('info', `Going to ${fx.toFixed(1)}, ${fy.toFixed(1)}, ${fz.toFixed(1)}...`);
+      return true;
+    } catch (e) {
+      this.log('error', `Pathfinder error: ${e.message}`);
+      return false;
+    }
+  }
+
+  stopGoto() {
+    if (!this.bot || !this.bot.pathfinder) return false;
+    try {
+      this.bot.pathfinder.setGoal(null);
+      this.log('info', 'Pathfinding stopped.');
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  eat() {
+    if (!this.bot || this.status !== 'online' || !this.bot.autoEat) {
+      this.log('warn', 'Cannot eat: bot offline or auto-eat not loaded.');
+      return false;
+    }
+    try {
+      if (this.bot.autoEat.eat) {
+        this.bot.autoEat.eat().then(() => this.log('info', 'Manual eat done.')).catch((e) => this.log('warn', `Eat failed: ${e.message}`));
+      } else if (this.bot.autoEat.enable) {
+        this.bot.autoEat.enable();
+        this.log('info', 'Auto-eat enabled.');
+      }
+      return true;
+    } catch (e) {
+      this.log('error', `Eat error: ${e.message}`);
+      return false;
+    }
+  }
+
+  getInventory() {
+    if (!this.bot || !this.bot.inventory) return null;
+    const items = this.bot.inventory.items().map((it) => ({
+      slot: it.slot,
+      name: it.name,
+      displayName: it.displayName,
+      count: it.count,
+    }));
+    const heldSlot = this.bot.quickBarSlot;
+    const held = this.bot.heldItem ? {
+      name: this.bot.heldItem.name,
+      displayName: this.bot.heldItem.displayName,
+      count: this.bot.heldItem.count,
+    } : null;
+    return { items, heldSlot, held };
+  }
+
   getPosition() {
     if (!this.bot || !this.bot.entity) return null;
     const p = this.bot.entity.position;
@@ -299,6 +433,10 @@ class BotManager extends EventEmitter {
       players: this.bot ? Object.keys(this.bot.players || {}) : [],
       health: this.bot ? this.bot.health : null,
       food: this.bot ? this.bot.food : null,
+      experience: this.bot && this.bot.experience ? { level: this.bot.experience.level, points: this.bot.experience.points } : null,
+      gameMode: this.bot ? this.bot.game && this.bot.game.gameMode : null,
+      inventory: this.getInventory(),
+      viewerReady: !!this._viewerStarted,
     };
   }
 }

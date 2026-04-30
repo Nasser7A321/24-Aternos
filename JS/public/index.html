@@ -143,11 +143,52 @@
         </div>
       </div>
 
+      <h3>الذهاب إلى إحداثيات</h3>
+      <div class="goto-row">
+        <input type="number" id="gotoX" placeholder="X" step="1" />
+        <input type="number" id="gotoY" placeholder="Y" step="1" />
+        <input type="number" id="gotoZ" placeholder="Z" step="1" />
+        <button id="btnGoto" class="btn">🧭 اذهب</button>
+        <button id="btnGotoStop" class="btn danger">⏹</button>
+        <button id="btnEat" class="btn">🍗 كُل</button>
+      </div>
+
       <h3>إرسال رسالة في الشات</h3>
       <form id="chatForm" class="chat-form">
         <input type="text" id="chatInput" placeholder="اكتب رسالة أو أمر مثل /home" autocomplete="off" />
         <button type="submit" class="btn">إرسال</button>
       </form>
+    </section>
+
+    <section class="card wide">
+      <div class="logs-header">
+        <h2>👁 رؤية البوت (3D)</h2>
+        <div>
+          <button id="btnViewerReload" class="btn small">إعادة تحميل</button>
+          <a href="/viewer/" target="_blank" class="btn small">فتح في نافذة</a>
+        </div>
+      </div>
+      <div class="viewer-wrap">
+        <iframe id="viewerFrame" src="about:blank" title="Bot 3D View"></iframe>
+        <div id="viewerOverlay" class="viewer-overlay">
+          شغّل البوت لرؤية ما يراه داخل اللعبة بصيغة 3D.
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>🎒 الحقيبة (Inventory)</h2>
+      <div class="held-line" id="heldLine">لا شيء في اليد</div>
+      <div class="inventory-grid" id="inventoryGrid">
+        <div class="empty-note">الحقيبة فارغة أو البوت غير متصل</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>👥 اللاعبون أونلاين</h2>
+      <div class="players-list" id="playersList">
+        <div class="empty-note">لا يوجد لاعبون أو البوت غير متصل</div>
+      </div>
     </section>
 
     <section class="card wide">

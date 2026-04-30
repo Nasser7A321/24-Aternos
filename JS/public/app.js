@@ -20,7 +20,15 @@ const els = {
   statFood: $('#statFood'),
   statPos: $('#statPos'),
   statPlayers: $('#statPlayers'),
+  inventoryGrid: $('#inventoryGrid'),
+  heldLine: $('#heldLine'),
+  playersList: $('#playersList'),
+  viewerFrame: $('#viewerFrame'),
+  viewerOverlay: $('#viewerOverlay'),
+  btnViewerReload: $('#btnViewerReload'),
 };
+
+let viewerLoaded = false;
 
 function setStatus(status) {
   els.statusText.textContent = status;
@@ -88,6 +96,52 @@ function readConfigFromForm() {
   };
 }
 
+function renderInventory(inv) {
+  if (!inv || !inv.items || inv.items.length === 0) {
+    els.inventoryGrid.innerHTML = '<div class="empty-note">الحقيبة فارغة أو البوت غير متصل</div>';
+    els.heldLine.textContent = 'لا شيء في اليد';
+    return;
+  }
+  if (inv.held) {
+    els.heldLine.innerHTML = 'في اليد: <strong>' + (inv.held.displayName || inv.held.name) + '</strong> ×' + inv.held.count;
+  } else {
+    els.heldLine.textContent = 'لا شيء في اليد';
+  }
+  const slots = inv.items.map((it) => {
+    const isHeld = inv.heldSlot != null && (it.slot === (36 + inv.heldSlot));
+    return '<div class="inv-slot' + (isHeld ? ' held' : '') + '" title="slot ' + it.slot + '">' +
+      '<div class="name">' + (it.displayName || it.name) + '</div>' +
+      '<div class="count">×' + it.count + '</div>' +
+    '</div>';
+  });
+  els.inventoryGrid.innerHTML = slots.join('');
+}
+
+function renderPlayers(players) {
+  if (!players || players.length === 0) {
+    els.playersList.innerHTML = '<div class="empty-note">لا يوجد لاعبون أو البوت غير متصل</div>';
+    return;
+  }
+  els.playersList.innerHTML = players.map((p) => '<span class="player-chip">' + p + '</span>').join('');
+}
+
+function updateViewerVisibility(status) {
+  const online = status === 'online';
+  if (online && !viewerLoaded) {
+    setTimeout(() => {
+      els.viewerFrame.src = '/viewer/?_=' + Date.now();
+      viewerLoaded = true;
+    }, 1500);
+  }
+  if (!online) {
+    els.viewerFrame.src = 'about:blank';
+    viewerLoaded = false;
+    els.viewerOverlay.classList.remove('hidden');
+  } else {
+    els.viewerOverlay.classList.add('hidden');
+  }
+}
+
 function applySnapshot(snap) {
   setStatus(snap.status || 'offline');
   els.statHealth.textContent = snap.health != null ? snap.health.toFixed(1) : '—';
@@ -99,6 +153,9 @@ function applySnapshot(snap) {
     els.statPos.textContent = '—';
   }
   els.statPlayers.textContent = snap.players ? snap.players.length : '—';
+  renderInventory(snap.inventory);
+  renderPlayers(snap.players);
+  updateViewerVisibility(snap.status);
   if (Array.isArray(snap.logs)) {
     els.logs.innerHTML = '';
     snap.logs.forEach(appendLog);
@@ -146,6 +203,8 @@ function poll() {
         els.statPos.textContent = '—';
       }
       els.statPlayers.textContent = snap.players ? snap.players.length : '—';
+      renderInventory(snap.inventory);
+      renderPlayers(snap.players);
     } catch (e) { /* ignore */ }
   }, 3000);
 }
@@ -154,7 +213,11 @@ function connectStream() {
   const es = new EventSource('/api/events');
   es.addEventListener('snapshot', (ev) => applySnapshot(JSON.parse(ev.data)));
   es.addEventListener('log', (ev) => appendLog(JSON.parse(ev.data)));
-  es.addEventListener('status', (ev) => setStatus(JSON.parse(ev.data).status));
+  es.addEventListener('status', (ev) => {
+    const d = JSON.parse(ev.data);
+    setStatus(d.status);
+    updateViewerVisibility(d.status);
+  });
   es.onerror = () => { /* browser will auto-retry */ };
 }
 
@@ -229,6 +292,30 @@ const btnDrop = document.getElementById('btnDrop');
 if (btnMoveStop) btnMoveStop.addEventListener('click', () => api('/api/move-stop'));
 if (btnAttack) btnAttack.addEventListener('click', () => api('/api/attack'));
 if (btnDrop) btnDrop.addEventListener('click', () => api('/api/drop'));
+
+const btnGoto = document.getElementById('btnGoto');
+const btnGotoStop = document.getElementById('btnGotoStop');
+const btnEat = document.getElementById('btnEat');
+if (btnGoto) btnGoto.addEventListener('click', () => {
+  const x = document.getElementById('gotoX').value;
+  const y = document.getElementById('gotoY').value;
+  const z = document.getElementById('gotoZ').value;
+  if (x === '' || y === '' || z === '') {
+    alert('أدخل قيم X و Y و Z');
+    return;
+  }
+  api('/api/goto', { x, y, z });
+});
+if (btnGotoStop) btnGotoStop.addEventListener('click', () => api('/api/goto-stop'));
+if (btnEat) btnEat.addEventListener('click', () => api('/api/eat'));
+
+if (els.btnViewerReload) {
+  els.btnViewerReload.addEventListener('click', () => {
+    viewerLoaded = false;
+    els.viewerFrame.src = '/viewer/?_=' + Date.now();
+    viewerLoaded = true;
+  });
+}
 
 loadConfig();
 connectStream();
