@@ -80,10 +80,15 @@ class BotManager extends EventEmitter {
 
     bot.on('spawn', () => {
       this.log('info', 'Bot spawned in world.');
-      const a = cfg.antiAfk || {};
-      if (a.forward) bot.setControlState('forward', true);
-      if (a.jump) bot.setControlState('jump', true);
-      if (a.sprint) bot.setControlState('sprint', true);
+      if (cfg.autoStartAntiAfk) {
+        const a = cfg.antiAfk || {};
+        if (a.forward) bot.setControlState('forward', true);
+        if (a.jump) bot.setControlState('jump', true);
+        if (a.sprint) bot.setControlState('sprint', true);
+        this.log('info', 'AntiAFK auto-started on spawn.');
+      } else {
+        this.log('info', 'Bot is idle. Use the control buttons or press AntiAFK ON.');
+      }
     });
 
     bot.on('chat', (username, message) => {
@@ -186,8 +191,8 @@ class BotManager extends EventEmitter {
   }
 
   move(action, durationMs) {
-    if (!this.bot || this.status !== 'online') {
-      this.log('warn', 'Cannot move: bot is not online.');
+    if (!this.bot) {
+      this.log('warn', 'Cannot move: bot is not connected.');
       return false;
     }
     const valid = ['forward', 'back', 'left', 'right', 'jump', 'sneak', 'sprint'];
@@ -197,11 +202,26 @@ class BotManager extends EventEmitter {
     }
     const ms = Math.max(50, Math.min(60000, parseInt(durationMs, 10) || 1000));
     this.log('info', `Move: ${action} for ${ms}ms`);
-    this.bot.setControlState(action, true);
-    if (this._moveTimers && this._moveTimers[action]) {
-      clearTimeout(this._moveTimers[action]);
+
+    // Toggles (no timer)
+    if (action === 'sneak' || action === 'sprint') {
+      const current = this.bot.getControlState ? this.bot.getControlState(action) : false;
+      this.bot.setControlState(action, !current);
+      this.log('info', `${action} -> ${!current ? 'ON' : 'OFF'}`);
+      return true;
     }
+
+    // Timed movements: clear conflicting movement first so the requested action is the only one active
+    const conflicting = ['forward', 'back', 'left', 'right'];
+    if (conflicting.includes(action)) {
+      conflicting.forEach((c) => {
+        if (c !== action) this.bot.setControlState(c, false);
+      });
+    }
+
+    this.bot.setControlState(action, true);
     this._moveTimers = this._moveTimers || {};
+    if (this._moveTimers[action]) clearTimeout(this._moveTimers[action]);
     this._moveTimers[action] = setTimeout(() => {
       if (this.bot) this.bot.setControlState(action, false);
       this._moveTimers[action] = null;

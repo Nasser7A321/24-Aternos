@@ -61,6 +61,7 @@ function applyConfigToForm(cfg) {
   els.form.afkForward.checked = !!a.forward;
   els.form.afkJump.checked = !!a.jump;
   els.form.afkSprint.checked = !!a.sprint;
+  els.form.autoStartAntiAfk.checked = !!cfg.autoStartAntiAfk;
   els.form.autoReconnect.checked = cfg.autoReconnect !== false;
   els.form.reconnectDelayMs.value = cfg.reconnectDelayMs || 5000;
 }
@@ -81,6 +82,7 @@ function readConfigFromForm() {
       jump: f.afkJump.checked,
       sprint: f.afkSprint.checked,
     },
+    autoStartAntiAfk: f.autoStartAntiAfk.checked,
     autoReconnect: f.autoReconnect.checked,
     reconnectDelayMs: parseInt(f.reconnectDelayMs.value, 10) || 5000,
   };

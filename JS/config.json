@@ -11,6 +11,7 @@
     "jump": true,
     "sprint": true
   },
-  "autoReconnect": false,
+  "autoStartAntiAfk": false,
+  "autoReconnect": true,
   "reconnectDelayMs": 5000
 }
