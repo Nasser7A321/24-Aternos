@@ -485,3 +485,76 @@ fieldset.afk legend { color: var(--muted); padding: 0 6px; font-size: 12px; }
     grid-template-columns: 1fr;
   }
 }
+
+.player-cmd-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 8px 0;
+}
+.player-select {
+  flex: 1;
+  min-width: 140px;
+  padding: 8px 10px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 13px;
+}
+.follow-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 12px;
+  background: rgba(74, 222, 128, 0.12);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+.follow-status strong { color: var(--accent); }
+.player-chip.clickable {
+  cursor: pointer;
+  user-select: none;
+}
+.player-chip.clickable:hover {
+  background: var(--panel);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.player-chip.selected {
+  background: var(--accent);
+  color: #052e13;
+  border-color: var(--accent);
+  font-weight: 600;
+}
+.cmd-help {
+  margin-top: 10px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+.cmd-help summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 13px;
+}
+.cmd-help ul {
+  margin: 8px 0 4px;
+  padding-right: 20px;
+  padding-left: 0;
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.8;
+}
+.cmd-help code {
+  background: var(--panel);
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: var(--accent);
+  font-family: monospace;
+  font-size: 11px;
+}

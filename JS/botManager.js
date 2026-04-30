@@ -113,19 +113,7 @@ class BotManager extends EventEmitter {
     bot.on('chat', (username, message) => {
       if (username === bot.username) return;
       this.log('chat', `<${username}> ${message}`);
-      if (message === ';start') {
-        bot.chat('24 ATERNOS > Bot started!');
-        const a = cfg.antiAfk || {};
-        if (a.forward) bot.setControlState('forward', true);
-        if (a.jump) bot.setControlState('jump', true);
-        if (a.sprint) bot.setControlState('sprint', true);
-      } else if (message === ';stop') {
-        bot.chat('24 ATERNOS > Bot stopped!');
-        bot.clearControlStates();
-      } else if (message === ';pos') {
-        const p = bot.entity.position;
-        bot.chat(`Bot > I am at ${p.toString()}`);
-      }
+      this._handleChatCommand(username, message);
     });
 
     bot.on('death', () => {
@@ -164,6 +152,128 @@ class BotManager extends EventEmitter {
         this._scheduleReconnect();
       }
     });
+  }
+
+  _handleChatCommand(username, message) {
+    const bot = this.bot;
+    if (!bot) return;
+    const cfg = this.config || {};
+    const text = (message || '').trim();
+    const lower = text.toLowerCase();
+
+    if (text === ';start') {
+      bot.chat('24 ATERNOS > Bot started!');
+      const a = cfg.antiAfk || {};
+      if (a.forward) bot.setControlState('forward', true);
+      if (a.jump) bot.setControlState('jump', true);
+      if (a.sprint) bot.setControlState('sprint', true);
+      return;
+    }
+    if (text === ';stop') {
+      bot.chat('24 ATERNOS > Bot stopped!');
+      bot.clearControlStates();
+      return;
+    }
+    if (text === ';pos') {
+      const p = bot.entity.position;
+      bot.chat(`Bot > I am at ${p.toString()}`);
+      return;
+    }
+
+    const tokens = lower.split(/\s+/);
+    const cmd = tokens[0];
+    const arg = tokens[1];
+
+    const comeWords = ['come', 'تعال', 'تعالي', '!come', '.come', ';come'];
+    const followWords = ['follow', 'اتبع', 'اتبعني', '!follow', '.follow', ';follow'];
+    const stopWords = ['stay', 'stop-follow', 'توقف', 'قف', '!stop', '.stop', ';stop-follow'];
+    const gotoWords = ['goto', 'اذهب', '!goto', '.goto', ';goto'];
+
+    if (comeWords.includes(cmd)) {
+      const target = arg || username;
+      this.comeToPlayer(target);
+      return;
+    }
+    if (followWords.includes(cmd)) {
+      const target = arg || username;
+      this.followPlayer(target);
+      return;
+    }
+    if (stopWords.includes(cmd)) {
+      this.stopGoto();
+      return;
+    }
+    if (gotoWords.includes(cmd) && tokens.length >= 4) {
+      this.goto(tokens[1], tokens[2], tokens[3]);
+      return;
+    }
+  }
+
+  _ensureMovements() {
+    if (!this.bot || !this.bot.pathfinder) return false;
+    try {
+      const mcData = require('minecraft-data')(this.bot.version);
+      const movements = new Movements(this.bot, mcData);
+      this.bot.pathfinder.setMovements(movements);
+      return true;
+    } catch (e) {
+      this.log('error', `Movements setup failed: ${e.message}`);
+      return false;
+    }
+  }
+
+  comeToPlayer(username) {
+    if (!this.bot || this.status !== 'online') {
+      this.log('warn', 'Cannot come: bot is not online.');
+      return false;
+    }
+    if (!this.bot.pathfinder) {
+      this.log('warn', 'Pathfinder not loaded.');
+      return false;
+    }
+    if (!username) {
+      this.log('warn', 'No player specified.');
+      return false;
+    }
+    const player = this.bot.players[username];
+    if (!player || !player.entity) {
+      this.log('warn', `Player "${username}" is not visible (must be in render distance).`);
+      try { this.bot.chat(`I can't see ${username}.`); } catch (_) {}
+      return false;
+    }
+    if (!this._ensureMovements()) return false;
+    const p = player.entity.position;
+    this.bot.pathfinder.setGoal(new goals.GoalNear(p.x, p.y, p.z, 2));
+    this.log('info', `Coming to ${username} at ${p.x.toFixed(1)}, ${p.y.toFixed(1)}, ${p.z.toFixed(1)}.`);
+    try { this.bot.chat(`Coming to ${username}!`); } catch (_) {}
+    return true;
+  }
+
+  followPlayer(username) {
+    if (!this.bot || this.status !== 'online') {
+      this.log('warn', 'Cannot follow: bot is not online.');
+      return false;
+    }
+    if (!this.bot.pathfinder) {
+      this.log('warn', 'Pathfinder not loaded.');
+      return false;
+    }
+    if (!username) {
+      this.log('warn', 'No player specified.');
+      return false;
+    }
+    const player = this.bot.players[username];
+    if (!player || !player.entity) {
+      this.log('warn', `Player "${username}" is not visible (must be in render distance).`);
+      try { this.bot.chat(`I can't see ${username} to follow.`); } catch (_) {}
+      return false;
+    }
+    if (!this._ensureMovements()) return false;
+    this.bot.pathfinder.setGoal(new goals.GoalFollow(player.entity, 2), true);
+    this._followingPlayer = username;
+    this.log('info', `Following ${username}.`);
+    try { this.bot.chat(`Following ${username}.`); } catch (_) {}
+    return true;
   }
 
   toggleFly() {
@@ -402,7 +512,9 @@ class BotManager extends EventEmitter {
     if (!this.bot || !this.bot.pathfinder) return false;
     try {
       this.bot.pathfinder.setGoal(null);
+      this._followingPlayer = null;
       this.log('info', 'Pathfinding stopped.');
+      try { this.bot.chat('Stopped.'); } catch (_) {}
       return true;
     } catch (e) {
       return false;
@@ -465,6 +577,7 @@ class BotManager extends EventEmitter {
       inventory: this.getInventory(),
       viewerReady: !!this._viewerStarted,
       flying: !!this._flying,
+      following: this._followingPlayer || null,
     };
   }
 }

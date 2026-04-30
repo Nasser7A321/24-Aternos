@@ -117,12 +117,46 @@ function renderInventory(inv) {
   els.inventoryGrid.innerHTML = slots.join('');
 }
 
+let selectedPlayer = '';
+
 function renderPlayers(players) {
-  if (!players || players.length === 0) {
+  const list = players || [];
+  const select = document.getElementById('playerSelect');
+  if (select) {
+    const current = select.value;
+    select.innerHTML = '<option value="">— اختر لاعب —</option>' +
+      list.map((p) => '<option value="' + p + '">' + p + '</option>').join('');
+    if (list.includes(current)) select.value = current;
+    else if (list.includes(selectedPlayer)) select.value = selectedPlayer;
+  }
+  if (list.length === 0) {
     els.playersList.innerHTML = '<div class="empty-note">لا يوجد لاعبون أو البوت غير متصل</div>';
     return;
   }
-  els.playersList.innerHTML = players.map((p) => '<span class="player-chip">' + p + '</span>').join('');
+  els.playersList.innerHTML = list.map((p) => {
+    const sel = (p === selectedPlayer) ? ' selected' : '';
+    return '<span class="player-chip clickable' + sel + '" data-player="' + p + '">' + p + '</span>';
+  }).join('');
+  els.playersList.querySelectorAll('.player-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      selectedPlayer = chip.dataset.player;
+      const s = document.getElementById('playerSelect');
+      if (s) s.value = selectedPlayer;
+      els.playersList.querySelectorAll('.player-chip').forEach((c) => c.classList.toggle('selected', c.dataset.player === selectedPlayer));
+    });
+  });
+}
+
+function renderFollowStatus(following) {
+  const box = document.getElementById('followStatus');
+  const name = document.getElementById('followingName');
+  if (!box || !name) return;
+  if (following) {
+    name.textContent = following;
+    box.hidden = false;
+  } else {
+    box.hidden = true;
+  }
 }
 
 function updateViewerVisibility(status) {
@@ -158,6 +192,7 @@ function applySnapshot(snap) {
   updateViewerVisibility(snap.status);
   const flyBtn = document.getElementById('btnFly');
   if (flyBtn) flyBtn.classList.toggle('active', !!snap.flying);
+  renderFollowStatus(snap.following);
   if (Array.isArray(snap.logs)) {
     els.logs.innerHTML = '';
     snap.logs.forEach(appendLog);
@@ -313,6 +348,29 @@ if (btnEat) btnEat.addEventListener('click', () => api('/api/eat'));
 
 const btnFly = document.getElementById('btnFly');
 if (btnFly) btnFly.addEventListener('click', () => api('/api/fly'));
+
+function getSelectedPlayer() {
+  const select = document.getElementById('playerSelect');
+  return (select && select.value) || selectedPlayer || '';
+}
+
+const btnComeToPlayer = document.getElementById('btnComeToPlayer');
+const btnFollowPlayer = document.getElementById('btnFollowPlayer');
+const btnStopFollow = document.getElementById('btnStopFollow');
+const playerSelect = document.getElementById('playerSelect');
+
+if (playerSelect) playerSelect.addEventListener('change', (e) => { selectedPlayer = e.target.value; });
+if (btnComeToPlayer) btnComeToPlayer.addEventListener('click', () => {
+  const username = getSelectedPlayer();
+  if (!username) { alert('اختر لاعب أولاً'); return; }
+  api('/api/come', { username });
+});
+if (btnFollowPlayer) btnFollowPlayer.addEventListener('click', () => {
+  const username = getSelectedPlayer();
+  if (!username) { alert('اختر لاعب أولاً'); return; }
+  api('/api/follow', { username });
+});
+if (btnStopFollow) btnStopFollow.addEventListener('click', () => api('/api/follow-stop'));
 
 if (els.btnViewerReload) {
   els.btnViewerReload.addEventListener('click', () => {

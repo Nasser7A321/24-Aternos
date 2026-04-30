@@ -149,6 +149,23 @@ app.post('/api/fly', (req, res) => {
   res.json({ ok });
 });
 
+app.post('/api/come', (req, res) => {
+  const { username } = req.body || {};
+  const ok = manager.comeToPlayer(username);
+  res.json({ ok });
+});
+
+app.post('/api/follow', (req, res) => {
+  const { username } = req.body || {};
+  const ok = manager.followPlayer(username);
+  res.json({ ok });
+});
+
+app.post('/api/follow-stop', (req, res) => {
+  const ok = manager.stopGoto();
+  res.json({ ok });
+});
+
 app.post('/api/ping', (req, res) => {
   const cfg = loadConfig();
   const host = (req.body && req.body.host) || cfg.host;

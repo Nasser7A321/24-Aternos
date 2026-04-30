@@ -199,9 +199,32 @@
 
     <section class="card">
       <h2>👥 اللاعبون أونلاين</h2>
+      <div class="follow-status" id="followStatus" hidden>
+        <span>👣 يتبع الآن: <strong id="followingName">—</strong></span>
+        <button id="btnStopFollow" class="btn small danger">إيقاف المتابعة</button>
+      </div>
+      <div class="player-cmd-row">
+        <select id="playerSelect" class="player-select">
+          <option value="">— اختر لاعب —</option>
+        </select>
+        <button id="btnComeToPlayer" class="btn">🏃 تعال إليه</button>
+        <button id="btnFollowPlayer" class="btn">👣 اتبعه</button>
+      </div>
       <div class="players-list" id="playersList">
         <div class="empty-note">لا يوجد لاعبون أو البوت غير متصل</div>
       </div>
+      <details class="cmd-help">
+        <summary>أوامر الشات داخل اللعبة</summary>
+        <ul>
+          <li><code>come</code> أو <code>تعال</code> — البوت يجي إليك</li>
+          <li><code>come PlayerName</code> — البوت يجي عند لاعب معين</li>
+          <li><code>follow</code> أو <code>اتبعني</code> — يتبعك باستمرار</li>
+          <li><code>follow PlayerName</code> — يتبع لاعب معين</li>
+          <li><code>stop</code> أو <code>توقف</code> أو <code>قف</code> — يوقف المتابعة</li>
+          <li><code>goto X Y Z</code> أو <code>اذهب X Y Z</code> — يروح لإحداثيات</li>
+          <li><code>;start</code> / <code>;stop</code> / <code>;pos</code> — تحكم AntiAFK وعرض الموقع</li>
+        </ul>
+      </details>
     </section>
 
     <section class="card wide">
