@@ -185,6 +185,85 @@ class BotManager extends EventEmitter {
     return true;
   }
 
+  move(action, durationMs) {
+    if (!this.bot || this.status !== 'online') {
+      this.log('warn', 'Cannot move: bot is not online.');
+      return false;
+    }
+    const valid = ['forward', 'back', 'left', 'right', 'jump', 'sneak', 'sprint'];
+    if (!valid.includes(action)) {
+      this.log('warn', `Unknown move action: ${action}`);
+      return false;
+    }
+    const ms = Math.max(50, Math.min(60000, parseInt(durationMs, 10) || 1000));
+    this.log('info', `Move: ${action} for ${ms}ms`);
+    this.bot.setControlState(action, true);
+    if (this._moveTimers && this._moveTimers[action]) {
+      clearTimeout(this._moveTimers[action]);
+    }
+    this._moveTimers = this._moveTimers || {};
+    this._moveTimers[action] = setTimeout(() => {
+      if (this.bot) this.bot.setControlState(action, false);
+      this._moveTimers[action] = null;
+    }, ms);
+    return true;
+  }
+
+  stopAllMovement() {
+    if (!this.bot || this.status !== 'online') return false;
+    if (this._moveTimers) {
+      for (const k of Object.keys(this._moveTimers)) {
+        if (this._moveTimers[k]) clearTimeout(this._moveTimers[k]);
+        this._moveTimers[k] = null;
+      }
+    }
+    this.bot.clearControlStates();
+    this.log('info', 'All movement stopped.');
+    return true;
+  }
+
+  look(direction, degrees) {
+    if (!this.bot || this.status !== 'online' || !this.bot.entity) return false;
+    const deg = Math.max(-180, Math.min(180, parseFloat(degrees) || 0));
+    const rad = (deg * Math.PI) / 180;
+    const cur = this.bot.entity.yaw;
+    const curPitch = this.bot.entity.pitch;
+    let yaw = cur, pitch = curPitch;
+    if (direction === 'left')      yaw = cur + rad;
+    else if (direction === 'right') yaw = cur - rad;
+    else if (direction === 'up')    pitch = Math.max(-Math.PI/2, curPitch - rad);
+    else if (direction === 'down')  pitch = Math.min(Math.PI/2, curPitch + rad);
+    else if (direction === 'reset') { yaw = 0; pitch = 0; }
+    this.bot.look(yaw, pitch, true);
+    this.log('info', `Look: ${direction} ${deg}°`);
+    return true;
+  }
+
+  attack() {
+    if (!this.bot || this.status !== 'online') return false;
+    this.bot.swingArm();
+    const target = this.bot.nearestEntity((e) => e.type === 'mob' || e.type === 'player' && e.username !== this.bot.username);
+    if (target) {
+      this.bot.attack(target);
+      this.log('info', `Attacked ${target.username || target.name || 'entity'}`);
+    } else {
+      this.log('info', 'Swing (no target nearby)');
+    }
+    return true;
+  }
+
+  dropItem() {
+    if (!this.bot || this.status !== 'online') return false;
+    const item = this.bot.heldItem;
+    if (!item) {
+      this.log('warn', 'No item in hand to drop.');
+      return false;
+    }
+    this.bot.tossStack(item).catch((e) => this.log('error', `Drop failed: ${e.message}`));
+    this.log('info', `Dropped: ${item.name}`);
+    return true;
+  }
+
   getPosition() {
     if (!this.bot || !this.bot.entity) return null;
     const p = this.bot.entity.position;

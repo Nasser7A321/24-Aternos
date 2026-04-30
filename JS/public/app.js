@@ -205,6 +205,29 @@ els.chatForm.addEventListener('submit', async (e) => {
   els.chatInput.value = '';
 });
 
+document.querySelectorAll('.btn.move').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const action = btn.dataset.action;
+    const seconds = parseFloat(document.getElementById('moveDuration').value) || 2;
+    api('/api/move', { action, duration: Math.round(seconds * 1000) });
+  });
+});
+
+document.querySelectorAll('.btn.look').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const direction = btn.dataset.direction;
+    const degrees = parseFloat(btn.dataset.deg || '0');
+    api('/api/look', { direction, degrees });
+  });
+});
+
+const btnMoveStop = document.getElementById('btnMoveStop');
+const btnAttack = document.getElementById('btnAttack');
+const btnDrop = document.getElementById('btnDrop');
+if (btnMoveStop) btnMoveStop.addEventListener('click', () => api('/api/move-stop'));
+if (btnAttack) btnAttack.addEventListener('click', () => api('/api/attack'));
+if (btnDrop) btnDrop.addEventListener('click', () => api('/api/drop'));
+
 loadConfig();
 connectStream();
 poll();

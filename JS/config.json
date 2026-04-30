@@ -1,8 +1,8 @@
 {
-  "host": "HNasser7A321.aternos.me",
-  "port": 62194,
+  "host": "agamer1999.aternos.me",
+  "port": 56666,
   "username": "24ATERNOSBOT",
-  "version": "1.12.2",
+  "version": "1.21.10",
   "auth": "offline",
   "register": "",
   "login": "",
@@ -11,6 +11,6 @@
     "jump": true,
     "sprint": true
   },
-  "autoReconnect": true,
+  "autoReconnect": false,
   "reconnectDelayMs": 5000
 }

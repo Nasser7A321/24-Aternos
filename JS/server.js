@@ -81,6 +81,35 @@ app.post('/api/anti-afk', (req, res) => {
   res.json({ ok, enabled });
 });
 
+app.post('/api/move', (req, res) => {
+  const action = req.body && req.body.action;
+  const duration = (req.body && req.body.duration) || 1000;
+  const ok = manager.move(action, duration);
+  res.json({ ok });
+});
+
+app.post('/api/move-stop', (req, res) => {
+  const ok = manager.stopAllMovement();
+  res.json({ ok });
+});
+
+app.post('/api/look', (req, res) => {
+  const direction = req.body && req.body.direction;
+  const degrees = (req.body && req.body.degrees) || 45;
+  const ok = manager.look(direction, degrees);
+  res.json({ ok });
+});
+
+app.post('/api/attack', (req, res) => {
+  const ok = manager.attack();
+  res.json({ ok });
+});
+
+app.post('/api/drop', (req, res) => {
+  const ok = manager.dropItem();
+  res.json({ ok });
+});
+
 app.post('/api/ping', (req, res) => {
   const cfg = loadConfig();
   const host = (req.body && req.body.host) || cfg.host;

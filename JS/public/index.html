@@ -103,6 +103,42 @@
         <div><span class="k">Players</span><span class="v" id="statPlayers">—</span></div>
       </div>
 
+      <h3>التحكم بالحركة</h3>
+      <div class="movement-controls">
+        <div class="duration-row">
+          <label>المدة (ثانية):
+            <input type="number" id="moveDuration" value="2" min="0.1" step="0.1" max="60" />
+          </label>
+        </div>
+        <div class="dpad">
+          <div></div>
+          <button class="btn move" data-action="forward" title="تقدّم">▲</button>
+          <div></div>
+          <button class="btn move" data-action="left" title="يسار">◀</button>
+          <button class="btn move" data-action="jump" title="قفز">⤒</button>
+          <button class="btn move" data-action="right" title="يمين">▶</button>
+          <div></div>
+          <button class="btn move" data-action="back" title="تراجع">▼</button>
+          <div></div>
+        </div>
+        <div class="extra-actions">
+          <button class="btn move" data-action="sneak" title="تخفّي">🦆 تخفّي</button>
+          <button class="btn move" data-action="sprint" title="ركض">⚡ ركض</button>
+          <button id="btnAttack" class="btn">⚔️ ضرب</button>
+          <button id="btnDrop" class="btn">🎒 إسقاط</button>
+          <button id="btnMoveStop" class="btn danger">⏹ إيقاف</button>
+        </div>
+
+        <h3>التحكم بالنظر</h3>
+        <div class="look-controls">
+          <button class="btn look" data-direction="up" data-deg="30">⬆ أعلى</button>
+          <button class="btn look" data-direction="left" data-deg="45">↺ يسار 45°</button>
+          <button class="btn look" data-direction="reset">🎯 وسط</button>
+          <button class="btn look" data-direction="right" data-deg="45">↻ يمين 45°</button>
+          <button class="btn look" data-direction="down" data-deg="30">⬇ أسفل</button>
+        </div>
+      </div>
+
       <h3>إرسال رسالة في الشات</h3>
       <form id="chatForm" class="chat-form">
         <input type="text" id="chatInput" placeholder="اكتب رسالة أو أمر مثل /home" autocomplete="off" />

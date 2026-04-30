@@ -190,6 +190,28 @@ fieldset.afk legend { color: var(--muted); padding: 0 6px; font-size: 12px; }
 .chat-form { display: flex; gap: 8px; }
 .chat-form input { flex: 1; }
 
+.movement-controls { background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 8px; }
+.duration-row { margin-bottom: 12px; }
+.duration-row label { flex-direction: row; align-items: center; gap: 10px; color: var(--text); font-size: 13px; }
+.duration-row input { width: 90px; }
+
+.dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  max-width: 220px;
+  margin: 0 auto 12px;
+}
+.dpad .btn { padding: 14px 0; font-size: 18px; min-width: 0; }
+
+.extra-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; justify-content: center; }
+.extra-actions .btn { flex: 1 1 auto; min-width: 90px; padding: 10px 12px; font-size: 13px; }
+
+.look-controls { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.look-controls .btn { flex: 1 1 auto; min-width: 90px; padding: 10px 8px; font-size: 13px; }
+
+.btn.move:active, .btn.look:active { transform: scale(0.96); background: var(--accent); color: #052e13; }
+
 .logs-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 12px; flex-wrap: wrap; }
 .logs-header > div { display: flex; align-items: center; gap: 12px; }
 
